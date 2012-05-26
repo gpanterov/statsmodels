@@ -13,41 +13,26 @@ import KernelFunctions as kf
 NP=importr('np')
 r=robjects.r
 
-N=30
+N=300
 u=np.random.binomial(2,0.7,size=(N,1))
 c1=np.random.normal(size=(N,1))
-c2=np.random.normal(5,1,size=(N,1))
+c2=np.random.normal(2,1,size=(N,1))
 c3=np.random.normal(3,2,size=(N,1))
 
 
-dens=nparam.conditional_bw(tydat=[c1,u],txdat=[c2], dep_type='cu',indep_type='c',bwmethod='normal_reference')
-#print dens.bw
-#dens1=nparam.unconditional_bw(tdat=[c1,u],var_type='cu',bwmethod='normal_reference')
+dens_c=nparam.CKDE(tydat=[c1,c3],txdat=[c2], dep_type='cc',indep_type='c',bwmethod='normal_reference')
+dens_u=nparam.UKDE(tdat=[c1,c2],var_type='cc',bwmethod='normal_reference')
 #dens2=nparam.generic_kde(tdat=[wage,lwage],var_type='cc',bwmethod='normal_reference')
-##print dens1.bw
-##print dens2.bw
-#dens2.fit_pdf()
 
-##xy=dens1.pdf()
-##dens2=nparam.unconditional_bw(tdat=[lwage],var_type='c',bw=[0.4])
-##x=dens2.pdf()
-##print xy/x, dens.pdf()
-
-D={"S1": robjects.FloatVector(c1),"S2":robjects.FloatVector(c2),"S3":robjects.IntVector(u)}
+D={"S1": robjects.FloatVector(c1),"S2":robjects.FloatVector(c2),"S3":robjects.FloatVector(c3)}
 df=robjects.DataFrame(D)
 formula=r('S1+S3~S2')
-r_bw=NP.npcdensbw(formula, data=df, bwmethod='normal-reference')  #obtain R's estimate of the
-##print r_bw[1],r_bw[0]
-##print r_bw[1],r_bw[0]
+#r_bw=NP.npudensbw(formula, data=df, bwmethod='cv.ml')  #obtain R's estimate of the
+r_bw=NP.npcdensbw(formula, data=df, bwmethod='normal-reference')
 
 
 
 print "------------------------"*4
-print 'the estimate by R is: ', r_bw[1],r_bw[0], '||||||', 'the estimate by SM is: ', dens.bw
+print 'the estimate by R is: ', r_bw[1],r_bw[0], '||||||', 'the estimate by SM is: ', dens_c.bw
 
-print dens.pdf()
-##print "------------------------"*4
-###err += abs((sm_bw-r_bw[0][0])/sm_bw)  
-##
-###y_ord = np.random.binomial(n=3,p=0.3,size=100)
-###sm_bw_unord = bandwidths.bw_likelihood_cv(y_ord,'ordered',c=3)
+#print dens.pdf()
