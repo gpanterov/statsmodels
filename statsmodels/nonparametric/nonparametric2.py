@@ -782,7 +782,7 @@ class Reg(object):
             d_x = np.dot(a1, a2)
             D_x.append(d_x[0])
             B_x.append(d_x[1::])
-        return np.squeeze(np.asarray(D_x))
+        return np.squeeze(np.asarray(D_x)), np.squeeze(np.asarray(B_x))
 
     def g_lc(self, bw, tydat, txdat, edat):
         """
@@ -813,7 +813,18 @@ class Reg(object):
         G_denom = np.sum(tools.gpke(bw, tdat=txdat, edat=edat,
                                     var_type=self.var_type,
                                     tosum=False), axis=0)
-        return G_numer / G_denom
+        G = G_numer / G_denom
+        isordered = tools._get_type_pos(self.var_type)[0]
+        N = np.shape(txdat)[0]
+        fx = tools.gpke(bw, tdat=txdat, edat=edat, var_type=self.var_type,
+                        okertype='empty', ukertype='empty',
+                         tosum=True) / float(N)
+        d_fx = 
+        
+
+                            
+        B_x = []
+        return G, B_x
 
     def aic_hurvich(self):
         pass
@@ -856,7 +867,7 @@ class Reg(object):
         L = 0
         for X_j in LOO_X:
             Y = LOO_Y.next()
-            G = func(bw, tydat=Y, txdat=-X_j, edat=-self.txdat[i, :])
+            G = func(bw, tydat=Y, txdat=-X_j, edat=-self.txdat[i, :])[0]
             L += (self.tydat[i] - G) ** 2
             i += 1
         # Note: There might be a way to vectorize this. See p.72 in [1]
@@ -878,12 +889,6 @@ class Reg(object):
         return opt.fmin(res, x0=h0, args=(func, ), maxiter=1e3,
                       maxfun=1e3, disp=0)
 
-    def mean(self, edat=None):
-        func = self.est[self.reg_type]
-        if edat is None:
-            edat = self.txdat
-        return func(self.bw, self.tydat, self.txdat, edat=edat)
-
     def r_squared(self):
         """
         Returns the R-Squared for the nonparametric regression
@@ -900,9 +905,20 @@ class Reg(object):
         fitted values calculated in self.mean()
         """
         Y = np.squeeze(self.tydat)
-        Yhat = self.mean()
+        Yhat = self.fit()[0]
         Y_bar = np.mean(Yhat)
         R2_numer = (np.sum((Y - Y_bar) * (Yhat - Y_bar)) ** 2)
         R2_denom = np.sum((Y - Y_bar) ** 2, axis=0) * \
                    np.sum((Yhat - Y_bar) ** 2, axis=0)
         return R2_numer / R2_denom
+
+    def fit(self, edat=None):
+        """
+        Returns the marginal effects at the edat points
+        """
+        func = self.est[self.reg_type]
+        if edat is None:
+            edat = self.txdat
+        mean, mfx = func(self.bw, self.tydat, self.txdat, edat=edat)
+        return mean, mfx
+

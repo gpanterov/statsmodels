@@ -222,9 +222,9 @@ class TestReg(MyTest):
         sm_bw = model.bw
         R_bw = 0.1390096
 
-        sm_mean = model.mean()[0]
+        sm_mean = model.fit()[0][0]
         R_mean = 6.190486
-
+        #print "test_ordered_lc_cvls: ", sm_mean
         sm_R2 = model.r_squared()
         R_R2 = 0.1435323
 
@@ -244,7 +244,7 @@ class TestReg(MyTest):
         sm_bw = model.bw
         R_bw = [0.6163835, 0.1649656]
         # Conditional Mean
-        sm_mean = model.mean()[0:5]
+        sm_mean = model.fit()[0][0:5]
         R_mean = [31.49157, 37.29536, 43.72332, 40.58997, 36.80711]
         # R-Squared
         sm_R2 = model.r_squared()
@@ -261,12 +261,43 @@ class TestReg(MyTest):
         sm_bw = model.bw
         R_bw = [1.717891, 2.449415]
 
-        sm_mean = model.mean()[0:5]
+        sm_mean = model.fit()[0][0:5]
         R_mean = [31.16003, 37.30323, 44.49870, 40.73704, 36.19083]
-
         sm_R2 = model.r_squared()
         R_R2 = 0.9336019
 
         npt.assert_allclose(sm_bw, R_bw, atol=1e-2)
         npt.assert_allclose(sm_mean, R_mean, atol=1e-2)
         npt.assert_allclose(sm_R2, R_R2, atol=1e-2)
+
+    def test_mixeddata_lc_cvls(self):
+        model = nparam.Reg(tydat=[self.y2], txdat=[self.c1, self.c2, self.o],
+                            reg_type='lc', var_type='cco', bw='cv_ls')
+        
+        sm_bw = model.bw    
+        R_bw = [ 0.5320927, 0.2757364, 0.4866082]
+
+        sm_mean, sm_mfx = model.fit()
+        sm_mean = sm_mean[0:5]
+        R_mean = [33.48631, 38.00441, 45.68210, 41.46479, 38.44733]
+
+        sm_R2 = model.r_squared()
+        R_R2 = 0.9625288
+
+        npt.assert_allclose(sm_bw, R_bw, atol=1e-2)
+        npt.assert_allclose(sm_mean, R_mean, atol=1e-2)
+        npt.assert_allclose(sm_R2, R_R2, atol=1e-2)
+        print "test_mixeddata_lc_cvls - successful"
+
+    def test_mixeddata_ll_cvls(self):
+        model = nparam.Reg(tydat=[self.y2], txdat=[self.c1, self.c2],
+                            reg_type='ll', var_type='cc', bw='cv_ls')
+        sm_bw = model.bw
+        R_bw = [1.624842, 1.084703, 0.2298478]
+        print sm_bw
+        #npt.assert_allclose(sm_bw, R_bw, atol=1e-2)
+        print self.y2
+        sm_mean, sm_mfx = model.fit()
+        sm_mean = sm_mean[0:5]
+        
+        print "test_mixeddata_ll_cvls - successful"
