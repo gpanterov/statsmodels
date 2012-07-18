@@ -774,7 +774,9 @@ class Reg(object):
             X = (txdat - x)
             X = np.column_stack((np.ones(n), X))
             Kx = tools.gpke(bw, tdat=txdat, edat=x,
-                            var_type=self.var_type, tosum=False)
+                            var_type=self.var_type, 
+                            ukertype='aitchison_aitken_reg',
+                            okertype='wangryzin_reg', tosum=False)
             Kx = np.diag(np.squeeze(Kx))
             xtk = np.dot(X.T, Kx)
             a1 = np.linalg.pinv(np.dot(xtk, X))
@@ -808,21 +810,15 @@ class Reg(object):
 
         """
         KX = tools.gpke(bw, tdat=txdat, edat=edat,
-                        var_type=self.var_type, tosum=False)
+                        var_type=self.var_type,
+                            ukertype='aitchison_aitken_reg',
+                            okertype='wangryzin_reg', tosum=False)
         G_numer = np.sum(tydat * KX, axis=0)
         G_denom = np.sum(tools.gpke(bw, tdat=txdat, edat=edat,
                                     var_type=self.var_type,
-                                    tosum=False), axis=0)
+                            ukertype='aitchison_aitken_reg',
+                            okertype='wangryzin_reg', tosum=False), axis=0)
         G = G_numer / G_denom
-        isordered = tools._get_type_pos(self.var_type)[0]
-        N = np.shape(txdat)[0]
-        fx = tools.gpke(bw, tdat=txdat, edat=edat, var_type=self.var_type,
-                        okertype='empty', ukertype='empty',
-                         tosum=True) / float(N)
-        d_fx = 
-        
-
-                            
         B_x = []
         return G, B_x
 

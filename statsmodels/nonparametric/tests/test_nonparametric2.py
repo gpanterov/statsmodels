@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 import statsmodels.nonparametric as nparam
 #import nonparametric2 as nparam
-#reload(nparam)
-
+reload(nparam)
+import csv
 
 class MyTest(object):
     def setUp(self):
@@ -21,7 +21,7 @@ class MyTest(object):
         b1 = 1.2
         b2 = 3.7  # regression coefficients
         self.y = b0 + b1 * self.c1 + b2 * self.c2 + self.noise
-
+        self.y2 = b0 + b1 * self.c1 + b2 * self.c2 + self.o + self.noise
         # Italy data from R's np package (the first 50 obs) R>> data (Italy)
 
         self.Italy_gdp = \
@@ -276,7 +276,6 @@ class TestReg(MyTest):
         
         sm_bw = model.bw    
         R_bw = [ 0.5320927, 0.2757364, 0.4866082]
-
         sm_mean, sm_mfx = model.fit()
         sm_mean = sm_mean[0:5]
         R_mean = [33.48631, 38.00441, 45.68210, 41.46479, 38.44733]
@@ -296,8 +295,8 @@ class TestReg(MyTest):
         R_bw = [1.624842, 1.084703, 0.2298478]
         print sm_bw
         #npt.assert_allclose(sm_bw, R_bw, atol=1e-2)
-        print self.y2
         sm_mean, sm_mfx = model.fit()
         sm_mean = sm_mean[0:5]
-        
+        print sm_mean
+        print sm_mfx
         print "test_mixeddata_ll_cvls - successful"

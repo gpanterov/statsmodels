@@ -98,6 +98,7 @@ def AitchisonAitken(h, Xi, x, num_levels=False):
                    dtype=int)
     if num_levels:
         c = num_levels
+    c = c + 1
     kernel_value = np.tile(h / (c - 1), (N, 1))
     inDom = (Xi == x) * (1 - h)  #FIXME: only works for scalar `x`
     kernel_value[Xi == x] = inDom[Xi == x]
@@ -163,6 +164,35 @@ def Gaussian(h, Xi, x):
     z = (Xi - x) / h
     kernel_value = (1. / np.sqrt(2 * np.pi)) * np.exp(- z ** 2 / 2.)
     kernel_value = kernel_value.reshape([N, K])
+    return kernel_value
+
+
+def aitchison_aitken_reg(h, Xi, x):
+    """
+    A version for the atichison_aitken kernel for
+    nonparametric regression
+    Suggested by Li and Rcine
+    """
+    h, Xi, x, N, K = _get_shape_and_transform(h, Xi, x)
+    if K == 0:
+        return Xi
+    kernel_value = np.ones((N,K))
+    inDom = (Xi == x) * h
+    kernel_value[Xi == x] = inDom[Xi == x]
+    return kernel_value
+
+
+def wangryzin_reg(h, Xi, x):
+    """
+    A version for the wangryzin kernel for 
+    nonparametric regression
+    Suggested by Li and Rcine in [1] ch.4
+    """
+    h, Xi, x, N, K = _get_shape_and_transform(h, Xi, x)
+    if K == 0:
+        return Xi
+    kernel_value = h ** abs(Xi - x)
+    kenrel_value = kernel_value.reshape([N,K])
     return kernel_value
 
 
